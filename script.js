@@ -228,58 +228,122 @@
   
 
 
-        // 9. FORMULÁRIO DE CONTATO (FormSubmit via AJAX)
+   // 9. FORMULÁRIO AJAX COM VALIDAÇÃO DE EMAIL
         const contactForm = document.getElementById('contact-form');
         const formBtn = document.getElementById('form-button');
 
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Impede a página de recarregar
+        // Função simples e eficiente de validação de email (Regex)
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
 
-            // Muda o texto do botão para "Enviando..."
-            const originalBtnText = formBtn.innerHTML;
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Impede recarregar
+            
+            const originalBtnText = "ENVIAR MENSAGEM <i class='fas fa-paper-plane'></i>";
+            const emailInput = contactForm.querySelector('input[name="email"]');
+
+            // --- VALIDAÇÃO EXTRA DE EMAIL ---
+            if (!validateEmail(emailInput.value)) {
+                // Se o email for inválido, avisa no botão e PARA TUDO
+                formBtn.innerHTML = 'EMAIL INVÁLIDO <i class="fas fa-exclamation-triangle"></i>';
+                formBtn.style.backgroundColor = '#ff4444'; // Vermelho alerta
+                formBtn.style.color = '#fff';
+                
+                // Volta o botão ao normal depois de 3 segundos
+                setTimeout(() => {
+                    formBtn.innerHTML = originalBtnText;
+                    formBtn.style.backgroundColor = ''; 
+                    formBtn.style.color = '';
+                }, 3000);
+                return; // O "return" aqui impede que o código continue e envie o formulário
+            }
+
+            // Se passou na validação, continua o envio...
             formBtn.innerHTML = 'ENVIANDO... <i class="fas fa-spinner fa-spin"></i>';
             formBtn.style.opacity = '0.7';
             formBtn.disabled = true;
 
-            // Pega os dados do formulário
             const formData = new FormData(contactForm);
-
-            // MUDAR AQUI: Coloque seu email real no lugar de SEU_EMAIL_AQUI
-            const emailDestino = "diogo.dmlrj@gmail.com"; 
             
-            fetch(`https://formsubmit.co/ajax/${emailDestino}`, {
+            // Seu e-mail já está configurado no HTML (action), então usamos ele aqui se precisar ou deixamos a URL do action
+            // Como você colocou o email no HTML, podemos pegar a URL direto de lá para ficar dinâmico:
+            const actionURL = contactForm.getAttribute('action');
+            
+            fetch(actionURL, {
                 method: "POST",
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                // Sucesso!
-                formBtn.innerHTML = 'MENSAGEM ENVIADA! <i class="fas fa-check"></i>';
-                formBtn.style.backgroundColor = '#00ff88'; // Verde sucesso
-                formBtn.style.color = '#000';
-                
-                // Limpa o formulário
-                contactForm.reset();
-
-                // Volta o botão ao normal depois de 3 segundos
+            .then(response => {
+                if(response.ok) {
+                    // Sucesso
+                    formBtn.innerHTML = 'MENSAGEM ENVIADA! <i class="fas fa-check"></i>';
+                    formBtn.style.backgroundColor = '#00ff88'; // Verde Neon
+                    formBtn.style.color = '#000';
+                    contactForm.reset();
+                } else {
+                    throw new Error('Falha no envio');
+                }
+            })
+            .catch(error => {
+                // Erro de rede ou servidor
+                console.error('Erro:', error);
+                formBtn.innerHTML = 'ERRO AO ENVIAR <i class="fas fa-times"></i>';
+                formBtn.style.backgroundColor = 'red';
+            })
+            .finally(() => {
+                // Reseta o botão após 3 segundos (tanto no sucesso quanto no erro)
                 setTimeout(() => {
                     formBtn.innerHTML = originalBtnText;
-                    formBtn.style.backgroundColor = ''; // Volta a cor original (CSS)
+                    formBtn.style.backgroundColor = ''; 
                     formBtn.style.color = '';
                     formBtn.style.opacity = '1';
                     formBtn.disabled = false;
                 }, 3000);
-            })
-            .catch(error => {
-                // Erro
-                console.error('Erro:', error);
-                formBtn.innerHTML = 'ERRO AO ENVIAR <i class="fas fa-times"></i>';
-                formBtn.style.backgroundColor = 'red';
-                
-                setTimeout(() => {
-                    formBtn.innerHTML = originalBtnText;
-                    formBtn.style.backgroundColor = '';
-                    formBtn.disabled = false;
-                }, 3000);
             });
         });
+
+
+
+
+
+        // 10. MODAL DE PROJETOS
+        const modal = document.getElementById("projectModal");
+        const modalImg = document.getElementById("img01");
+        const captionText = document.getElementById("caption");
+        const closeBtn = document.getElementsByClassName("close-modal")[0];
+        
+        // Seleciona todos os cards de projeto
+        const triggers = document.querySelectorAll('.project-trigger');
+
+        triggers.forEach(card => {
+            card.addEventListener('click', function() {
+                modal.style.display = "flex"; // Mostra o modal
+                
+                // Pega a imagem definida no data-image do HTML
+                // Se não tiver imagem definida, usa uma padrão ou placeholder
+                const imageSrc = this.getAttribute('data-image');
+                const title = this.getAttribute('data-title');
+                
+                if(imageSrc) {
+                    modalImg.src = imageSrc;
+                } else {
+                    modalImg.src = "https://via.placeholder.com/800x600?text=Projeto+Sem+Print"; // Fallback
+                }
+                
+                captionText.innerHTML = title || "Detalhes do Projeto";
+            });
+        });
+
+        // Fechar ao clicar no X
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Fechar ao clicar fora da imagem
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
