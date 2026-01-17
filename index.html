@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diogo Lobo - Vibe Coding</title>
+    
+    <meta name="description" content="Portfólio de Desenvolvedor Full Stack.">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/1005/1005141.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1005/1005141.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+</head>
+  <style>
+            /* =========================================
+           1. VARIÁVEIS & RESET
+           ========================================= */
+        :root {
+            --bg-color: #050505;
+            --card-bg: #0b0b0b;
+            --text-main: #ffffff;
+            --text-sec: #a0a0a0;
+            --accent: #00ff88; /* Verde Neon */
+            --accent-sec: #00b8ff;
+            --accent-glow: rgba(0, 255, 136, 0.5);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            
+            /* NOVA VARIÁVEL PARA O MENU */
+            --nav-bg: rgba(0, 0, 0, 0.8); 
+            --scroll-track: rgba(0, 0, 0, 0.9); /* Fundo Preto no Modo Escuro */
+            --text-scroll: #000;
+        }
+
+        body.light-mode {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sec: #555555;
+            --accent: #2563eb;
+            --accent-sec: #7c3aed;
+            --accent-glow: rgba(37, 99, 235, 0.4);
+            --input-bg: #eef2f6;
+            --border-color: rgba(0, 0, 0, 0.1);
+            
+            /* MENU BRANCO NO MODO CLARO */
+            --nav-bg: rgba(255, 255, 255, 0.95); 
+            --scroll-track: #ffffff; /* Fundo Branco no Modo Claro */
+            --text-scroll: #fff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        html { scroll-behavior: smooth; }
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            font-family: 'Segoe UI', sans-serif; 
+            overflow-x: hidden; 
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Container Centralizador */
+        .container { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* =========================================
+           2. UTILITÁRIOS (SCROLL BAR HUD)
+           ========================================= */
+        #scroll-loader-container {
+            position: fixed; top: 0; left: 0; width: 100%; 
+            height: 20px; 
+background: var(--scroll-track);
+            z-index: 10001;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #scroll-progress-bar {
+            height: 100%; 
+            background: var(--accent); 
+            width: 0%; 
+            box-shadow: 0 0 15px var(--accent); 
+            position: relative; 
+            transition: width 0.1s linear;
+            min-width: 35px; 
+        }
+
+        #scroll-percent-text {
+            position: absolute; 
+            right: 5px; 
+            top: 50%;
+            transform: translateY(-50%); 
+            font-family: 'Courier New', monospace; 
+            font-weight: 900; 
+            color: var(--text-scroll); /* Texto sempre preto para ler dentro do verde/azul */
+            font-size: 0.75rem; 
+            background: transparent; 
+            padding: 0; 
+            border: none; 
+            pointer-events: none;
+        }
+
+        #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+        .cursor-dot, .cursor-outline { position: fixed; top: 0; left: 0; transform: translate(-50%, -50%); border-radius: 50%; z-index: 9999; pointer-events: none; }
+        .cursor-dot { width: 8px; height: 8px; background-color: var(--accent); }
+        .cursor-outline { width: 40px; height: 40px; border: 2px solid var(--accent); transition: width 0.2s, height 0.2s, background-color 0.2s; }
+        a:hover ~ .cursor-outline, button:hover ~ .cursor-outline, .neon-card:hover ~ .cursor-outline, input:hover ~ .cursor-outline, .system-status:hover ~ .cursor-outline { transform: translate(-50%, -50%) scale(1.8); background-color: var(--accent-glow); border-color: transparent; mix-blend-mode: screen; }
+
+        /* =========================================
+           3. NAVBAR (ATUALIZADO COM VARIÁVEL)
+           ========================================= */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 5%;
+            position: fixed; width: 100%; z-index: 1000;
+            
+            /* AQUI ESTÁ A MUDANÇA: Usa a variável que muda de cor */
+            background: var(--nav-bg); 
+            backdrop-filter: blur(10px);
+            
+            border-bottom: 1px solid var(--border-color);
+            top: 20px; 
+            transition: background 0.3s ease;
+        }
+        .logo { font-size: 1.8rem; font-weight: bold; color: var(--accent); letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
+        .nav-links { display: flex; gap: 30px; list-style: none; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 1.1rem; transition: 0.3s; position: relative; }
+        .nav-links a:hover { color: var(--accent); }
+        .nav-links a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s ease; }
+        .nav-links a:hover::after { width: 100%; }
+        .theme-switch { background: transparent; border: 2px solid var(--text-main); color: var(--text-main); padding: 8px 12px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
+        .menu-btn { display: none; font-size: 1.8rem; cursor: pointer; color: var(--text-main); }
+
+        /* =========================================
+           4. HERO (Compacto)
+           ========================================= */
+        .hero { height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 0 20px; }
+        
+        .status-badge { background: rgba(0, 255, 136, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 25px; display: inline-flex; align-items: center; gap: 10px; animation: float 3s ease-in-out infinite; }
+        .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+        
+        .hero h3 { color: var(--accent); margin-bottom: 15px; letter-spacing: 4px; font-size: 1.2rem; }
+        .hero h1 { font-size: 4.5rem; line-height: 1.1; margin-bottom: 20px; font-weight: 800; }
+        .txt-type { border-right: 3px solid var(--accent); padding-right: 5px; animation: blink 0.8s infinite; }
+        .hero p { font-size: 1.2rem; color: var(--text-sec); max-width: 800px; margin-bottom: 30px; line-height: 1.5; }
+        
+        .cta-btn { padding: 14px 40px; background: var(--accent); color: #000; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow); transition: 0.3s; display: inline-block; animation: pulse-btn 2s infinite; }
+        .cta-btn:hover { transform: scale(1.05); }
+        .btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--text-main); box-shadow: none; margin-left: 15px; animation: none; }
+        .btn-outline:hover { background: var(--accent-glow); color: #fff; border-color: transparent; }
+
+        /* =========================================
+           5. SEÇÕES (Ajuste de Margem 30px-50px)
+           ========================================= */
+        /* Aqui está a correção principal de espaçamento */
+        section { 
+            padding: 50px 5%; /* 50px cima/baixo, 5% laterais */
+        }
+        
+        .section-title { font-size: 2.8rem; margin-bottom: 50px; text-align: center; font-weight: 800; color: var(--text-main); }
+        .section-title span { color: var(--accent); }
+
+        /* =========================================
+           6. SOBRE MIM (Efeito Storyteller Restaurado)
+           ========================================= */
+        #about .about-content { display: flex; align-items: center; justify-content: center; gap: 50px; max-width: 1200px; margin: 0 auto; }
+        
+        .about-img { flex: 1; max-width: 350px; position: relative; animation: float-img 4s ease-in-out infinite; }
+        .about-img img { width: 100%; border-radius: 20px; border: 2px solid var(--accent); box-shadow: 0 0 20px var(--accent-glow); object-fit: cover; }
+        
+        .about-text { flex: 1.5; }
+        .about-text h2 { font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main); }
+        
+        /* Texto Digitado */
+        .bio-text {
+            font-size: 1.1rem; color: var(--text-sec); line-height: 1.6; margin-bottom: 15px;
+            min-height: 80px; 
+            border-left: 3px solid var(--accent); padding-left: 15px;
+        }
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; color: var(--accent); }
+
+        @keyframes float-img { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+
+        /* =========================================
+           7. GRIDS & CARDS
+           ========================================= */
+        /* Gap reduzido para 30px conforme solicitado */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+
+        .neon-card { position: relative; background: var(--card-bg); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .neon-card:hover { transform: translateY(-5px); }
+        .card-inner { background: var(--card-bg); border-radius: 18px; padding: 30px; margin: 2px; z-index: 2; height: 100%; position: relative; }
+        
+        .neon-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, var(--accent), transparent 30%); animation: rotate-border 4s linear infinite; z-index: 1; opacity: 0; transition: opacity 0.3s; }
+        .neon-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, var(--accent-sec), transparent 30%); animation: rotate-border 4s linear infinite; animation-delay: -2s; z-index: 1; opacity: 0; transition: opacity 0.3s; }
+        .neon-card:hover::before, .neon-card:hover::after { opacity: 1; }
+
+        .neon-card h3 { color: var(--text-main); margin-bottom: 10px; font-size: 1.4rem; }
+        .neon-card p { color: var(--text-sec); margin-bottom: 15px; line-height: 1.5; font-size: 0.95rem; }
+        .tech-stack span { display: inline-block; background: var(--input-bg); color: var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; margin: 0 5px 5px 0; border: 1px solid var(--border-color); font-weight: bold; }
+        
+        .card-arrow { font-size: 1.2rem; color: var(--text-sec); transition: 0.4s ease; }
+        .neon-card:hover .card-arrow { color: var(--accent); transform: translate(5px, -5px); }
+        .card-links { margin-top: auto; padding-top: 15px; display: flex; gap: 15px; border-top: 1px solid var(--border-color); }
+        .card-btn { text-decoration: none; font-weight: bold; color: var(--text-main); display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .card-btn:hover { color: var(--accent); }
+
+        .skill-wrapper { margin-bottom: 15px; }
+        .skill-info { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+        .progress-bar-bg { width: 100%; height: 6px; background: var(--input-bg); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0; transition: width 1.5s ease; box-shadow: 0 0 10px var(--accent); }
+
+        .testimonial-avatar { width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+        .testimonial-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* =========================================
+           8. TIMELINE
+           ========================================= */
+        .timeline-container { position: relative; max-width: 800px; margin: 0 auto; }
+        .timeline-container::after { content: ''; position: absolute; width: 2px; background: var(--border-color); top: 0; bottom: 0; left: 50%; margin-left: -1px; }
+        .timeline-item { padding: 10px 40px; position: relative; width: 50%; box-sizing: border-box; }
+        .timeline-item.left { left: 0; text-align: right; }
+        .timeline-item.right { left: 50%; }
+        
+        .timeline-content { padding: 20px; background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border-color); transition: 0.3s; position: relative; z-index: 2; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .timeline-content:hover { border-color: var(--accent); transform: scale(1.02); }
+        .timeline-content h4 { color: var(--accent); font-size: 1.1rem; margin-bottom: 5px; }
+        .timeline-content span { font-size: 0.85rem; color: var(--text-sec); display: block; margin-bottom: 8px; }
+        .timeline-item::after { content: ''; position: absolute; width: 16px; height: 16px; right: -8px; background: var(--card-bg); border: 3px solid var(--accent); top: 25px; border-radius: 50%; z-index: 1; transition: 0.3s; }
+        .timeline-item.right::after { left: -8px; }
+        .timeline-item:hover::after { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        @media (max-width: 768px) {
+            .timeline-container::after { left: 20px; }
+            .timeline-item { width: 100%; padding-left: 50px; padding-right: 10px; }
+            .timeline-item.left { text-align: left; }
+            .timeline-item.right { left: 0; }
+            .timeline-item::after { left: 12px; }
+            .timeline-item.right::after { left: 12px; }
+        }
+
+        /* =========================================
+           9. CONTATO & FOOTER
+           ========================================= */
+        .contact-wrapper { display: flex; flex-wrap: wrap; gap: 50px; justify-content: center; align-items: center; }
+        .contact-info { flex: 1; min-width: 300px; }
+        .contact-info h3 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 15px; background: linear-gradient(to right, var(--text-main), var(--text-sec)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .contact-info p { font-size: 1.2rem; color: var(--text-sec); margin-bottom: 30px; }
+        .social-icons-big a { display: inline-flex; width: 55px; height: 55px; background: var(--input-bg); border-radius: 50%; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-main); margin-right: 15px; border: 1px solid var(--border-color); transition: 0.3s; text-decoration: none; }
+        .social-icons-big a:hover { background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent-glow); animation: shake 0.5s ease-in-out infinite; }
+
+        .contact-form { flex: 1.2; min-width: 350px; background: var(--card-bg); padding: 40px; border-radius: 20px; border: 1px solid var(--border-color); position: relative; overflow: hidden; box-shadow: 0 5px 30px rgba(0,0,0,0.1); }
+        .contact-form::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-sec)); animation: shimmer 2s infinite; }
+        .input-group input, .input-group textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); padding: 15px; border-radius: 10px; color: var(--text-main); margin-bottom: 20px; outline: none; transition: 0.3s; font-family: inherit; font-size: 1rem; }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--accent); background: var(--card-bg); transform: scale(1.01); }
+        .submit-btn { width: 100%; padding: 15px; background: var(--accent); border: none; border-radius: 10px; color: #000; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; animation: pulse-btn 2s infinite; }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 0 20px var(--accent-glow); }
+
+        footer { background: var(--bg-color); padding: 60px 5% 20px; margin-top: 80px; border-top: 1px solid var(--border-color); }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .footer-col h4 { color: var(--accent); font-size: 1.2rem; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px; }
+        .footer-col p { color: var(--text-sec); line-height: 1.5; margin-bottom: 15px; font-size: 0.95rem; }
+        .footer-links li { list-style: none; margin-bottom: 10px; }
+        .footer-links a { color: var(--text-sec); text-decoration: none; transition: 0.3s; font-size: 0.95rem; display: inline-flex; align-items: center; }
+        .footer-links a:hover { color: var(--accent); padding-left: 8px; font-weight: bold; }
+        .footer-links a::before { content: '>'; margin-right: 6px; color: var(--accent); opacity: 0; transition: 0.3s; }
+        .footer-links a:hover::before { opacity: 1; }
+
+        .newsletter-form { display: flex; margin-top: 15px; }
+        .newsletter-form input { padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 5px 0 0 5px; outline: none; width: 100%; }
+        .newsletter-form button { padding: 10px 15px; background: var(--accent); border: none; color: #000; font-weight: bold; border-radius: 0 5px 5px 0; cursor: pointer; transition: 0.3s; }
+        .footer-bottom { text-align: center; border-top: 1px solid var(--border-color); padding-top: 20px; color: var(--text-sec); font-size: 0.85rem; }
+
+        .scroll-top { position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: #000; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 100; }
+        .scroll-top.active { opacity: 1; pointer-events: auto; }
+        .whatsapp-float { position: fixed; bottom: 30px; left: 30px; background: #25D366; color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; z-index: 100; text-decoration: none; box-shadow: 0 0 15px rgba(37, 211, 102, 0.5); transition: 0.3s; }
+        .whatsapp-float:hover { transform: translateY(-5px); box-shadow: 0 0 25px rgba(37, 211, 102, 0.8); }
+
+        @keyframes rotate-border { 100% { transform: rotate(360deg); } }
+        @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
+        @keyframes shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 75% { transform: rotate(-10deg); } }
+        @keyframes pulse-btn { 0% { box-shadow: 0 0 0 0 var(--accent-glow); } 70% { box-shadow: 0 0 0 15px rgba(0,0,0,0); } }
+        @keyframes blink { 0%, 100% { border-color: transparent; } 50% { border-color: var(--accent); } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+        @media(max-width: 768px) {
+            .nav-links { position: fixed; top: 0; right: -100%; width: 80%; height: 100vh; background: var(--bg-color); flex-direction: column; justify-content: center; transition: 0.4s; border-left: 1px solid var(--border-color); }
+            .nav-links.active { right: 0; }
+            .menu-btn { display: block; z-index: 1001; }
+            .hero h1 { font-size: 3rem; }
+            .hero { padding-bottom: 100px; } /* Ajuste Mobile do Hero */
+            .contact-info h3 { font-size: 2.2rem; }
+            .footer-grid { grid-template-columns: 1fr; }
+            #about .about-content { flex-direction: column; }
+            .cta-btn, .btn-outline { width: 100%; margin: 10px 0; display: block; }
+        }
+
+        /* FOOTER STATUS FIX (SEM PULAR) */
+    .footer-bottom { 
+        text-align: center; 
+        border-top: 1px solid var(--border-color); 
+        padding-top: 30px; 
+        display: flex; 
+        justify-content: center; 
+        margin-bottom: 20px; 
+    }
+
+    .system-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 0 25px; /* Padding lateral */
+        background: rgba(0, 255, 136, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        
+        /* O SEGREDO PARA NÃO PULAR: */
+        min-width: 340px; /* Largura fixa suficiente para os dois textos */
+        height: 50px;     /* Altura fixa */
+    }
+
+    .system-status:hover {
+        background: rgba(0, 255, 136, 0.1);
+        border-color: var(--accent);
+        box-shadow: 0 0 25px var(--accent-glow);
+        transform: translateY(-2px);
+    }
+
+    /* A Bolinha (Sempre visível) */
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--accent);
+        animation: pulse-dot 2s infinite;
+        flex-shrink: 0; /* Impede a bolinha de amassar */
+    }
+
+    @keyframes pulse-dot {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+    }
+
+    /* O Texto */
+    .status-text {
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        color: var(--text-sec);
+        font-weight: bold;
+        position: relative;
+        transition: 0.3s;
+        white-space: nowrap;
+    }
+
+    /* TRUQUE DE ANIMAÇÃO SEM LAYOUT SHIFT */
+    
+    /* 1. Ao passar o mouse, o texto original fica invisível (mas segura o espaço) */
+    .system-status:hover .status-text {
+        color: transparent;
+        text-shadow: none;
+    }
+
+    /* 2. Preparamos o novo texto (oculto e centralizado) */
+    .status-text::after {
+        content: attr(data-hover); /* Pega o texto do HTML */
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -40%); /* Levemente deslocado para animar */
+        opacity: 0;
+        color: var(--text-main); /* Cor do novo texto (Branco/Preto) */
+        width: 100%;
+        text-align: center;
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    /* 3. Quando passa o mouse, o novo texto aparece suavemente */
+    .system-status:hover .status-text::after {
+        opacity: 1;
+        transform: translate(-50%, -50%); /* Vai para o centro exato */
+        color: var(--accent); /* Fica verde neon */
+    }
+
+    
+
+
+/* EFEITO GLITCH (Adicione no seu <style>) */
+.glitch-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.glitch-effect {
+    position: relative;
+    color: var(--text-main);
+    font-weight: 800;
+}
+
+/* Cria duas cópias do texto para o efeito RGB */
+.glitch-effect::before,
+.glitch-effect::after {
+    content: attr(data-text); /* Pega o mesmo texto do HTML */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-color); /* Esconde o original */
+}
+
+/* Camada Vermelha/Rosa */
+.glitch-effect::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-1 5s infinite linear alternate-reverse;
+    opacity: 0; /* Só aparece no hover */
+}
+
+/* Camada Azul/Ciano */
+.glitch-effect::after {
+    left: -2px;
+    text-shadow: -1px 0 #00fff9;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-2 5s infinite linear alternate-reverse;
+    opacity: 0; /* Só aparece no hover */
+}
+
+/* ATIVAR NO HOVER */
+.glitch-wrapper:hover .glitch-effect::before,
+.glitch-wrapper:hover .glitch-effect::after {
+    opacity: 1;
+}
+
+/* Animações caóticas */
+@keyframes glitch-anim-1 {
+    0% { clip: rect(20px, 9999px, 80px, 0); }
+    20% { clip: rect(70px, 9999px, 10px, 0); }
+    40% { clip: rect(20px, 9999px, 90px, 0); }
+    60% { clip: rect(80px, 9999px, 5px, 0); }
+    80% { clip: rect(10px, 9999px, 60px, 0); }
+    100% { clip: rect(50px, 9999px, 30px, 0); }
+}
+@keyframes glitch-anim-2 {
+    0% { clip: rect(60px, 9999px, 10px, 0); }
+    20% { clip: rect(10px, 9999px, 50px, 0); }
+    40% { clip: rect(90px, 9999px, 30px, 0); }
+    60% { clip: rect(30px, 9999px, 70px, 0); }
+    80% { clip: rect(50px, 9999px, 20px, 0); }
+    100% { clip: rect(10px, 9999px, 90px, 0); }
+}
+    
+  </style>
+<body>
+
+    <div id="scroll-loader-container">
+        <div id="scroll-progress-bar">
+            <div id="scroll-percent-text">0%</div>
+        </div>
+    </div>
+
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    <canvas id="particles"></canvas>
+
+    <a href="https://wa.me/5521973073162" target="_blank" class="whatsapp-float">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <nav>
+        <div class="logo" id="hacker-text">&lt;Diogo Lobo/&gt;</div>
+        <div class="menu-btn"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">Sobre</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#experience">Jornada</a></li>
+            <li><a href="#projects">Projetos</a></li>
+            <li><a href="#contact">Contato</a></li>
+            <button class="theme-switch" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+        </ul>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>Disponível para Novos Projetos</span>
+        </div>
+        <div class="logo glitch-wrapper">
+        <h3 class="glitch-effect" data-text="HELLO WORLD, EU SOU">HELLO WORLD, EU SOU</h3>
+        
+        <h1>
+            <span class="txt-type" data-wait="2000" data-words='["DESENVOLVEDOR", "FRONT-END", "ESTUDANTE","CRIATIVO"]'></span>
+        </h1>
+        <p>🌟 Desenvolvedor Web em formação | 5º Período de Análise e Desenvolvimento de Sistemas</p>
+        <div>
+            <a href="#contact" class="cta-btn">Chamar No whatsapp</a>
+            <a href="#" download class="cta-btn btn-outline"><i class="fas fa-download"></i> Baixar CV</a>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="about-content">
+            <div class="about-img">
+                <img src="/eu.png" alt="Minha Foto">
+            </div>
+            <div class="about-text">
+                <h2 class="section-title" style="text-align: left; margin-bottom: 20px;">Sobre <span>Mim</span></h2>
+                
+                <div class="bio-text typing-cursor" id="bio-part-1"></div>
+                <div class="bio-text" id="bio-part-2"></div>
+
+                <a href="#contact" class="cta-btn" style="display: inline-flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-comment-dots"></i> Vamos Conversar?
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills">
+        <h2 class="section-title">Minhas <span>Habilidades</span></h2>
+        <div class="grid-container">
+            <div class="neon-card">
+                <div class="card-inner">
+                    <h3><i class="fas fa-code" style="color: var(--accent)"></i> Tech Stack</h3>
+                    <div class="skill-wrapper">
+                        <div class="skill-info"><span>HTML / CSS</span><span>90%</span></div>
+                        <div class="progress-bar-bg"><div class="progress-fill" data-width="90%"></div></div>
+                    </div>
+                    <div class="skill-wrapper">
+                        <div class="skill-info"><span>JavaScript </span><span>60%</span></div>
+                        <div class="progress-bar-bg"><div class="progress-fill" data-width="60%"></div></div>
+                    </div>
+                    <div class="skill-wrapper">
+                        <div class="skill-info"><span>Vibe Coding</span><span>100%</span></div>
+                        <div class="progress-bar-bg"><div class="progress-fill" data-width="100%"></div></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="neon-card">
+                <div class="card-inner">
+                  <h3><i class="fas fa-wand-magic-sparkles" style="color: var(--accent)"></i> Vibe Coding (AI)</h3>
+                        <p style="margin-top: 15px;">Acelerando o desenvolvimento com IA:</p>
+                        <ul style="list-style: none; color: var(--text-sec); line-height: 2.2;">
+                            <li><i class="fas fa-check" style="color: var(--accent); margin-right: 10px;"></i> <strong>Prompt Engineering:</strong> Sei pedir o código certo.</li>
+                           <li><i class="fas fa-check" style="color: var(--accent); margin-right: 10px;"></i> <strong>Autonomia Técnica:</strong> Resolvo bloqueios com independência.</li>
+                            <li><i class="fas fa-check" style="color: var(--accent); margin-right: 10px;"></i> <strong>Aprendizado Acelerado:</strong> Novas stacks on-the-fly.</li>
+                        </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience">
+        <h2 class="section-title">Minha <span>Jornada</span></h2>
+        <div class="timeline-container">
+
+     <div class="timeline-item left">
+                <div class="timeline-content">
+                    <h4>Início dos Estudos</h4>
+                    <span>Curso Origamid</span>
+                    <p style="font-size: 0.9rem; color: var(--text-sec);">Cursos de HTML,CSS e JS.</p>
+                </div>
+            </div>
+
+         <div class="timeline-item right">
+                <div class="timeline-content">
+                    <h4>Continuação dos Estudos</h4>
+                    <span>OneBitCode e Udemy</span>
+                    <p style="font-size: 0.9rem; color: var(--text-sec);">JavaScript, React e Python.</p>
+                </div>
+            </div>
+
+           <div class="timeline-item left">
+                <div class="timeline-content">
+                    <h4>Graduando em ADS</h4>
+                    <span>5ª Periodo em curso</span>
+                    <p style="font-size: 0.9rem; color: var(--text-sec);">Procura de um estágio</p>
+                </div>
+            </div>
+
+  <div class="timeline-item right">
+                <div class="timeline-content">
+                    <h4>Freelancer</h4>
+                    <span>Faço site e aplicação web</span>
+                    <p style="font-size: 0.9rem; color: var(--text-sec);">Para testar meus conhecimentos.</p>
+                </div>
+            </div>
+
+ 
+   
+
+       
+        </div>
+
+    </section>
+
+    <section id="projects">
+        <h2 class="section-title">Projetos <span>Recentes</span></h2>
+        <div class="grid-container">
+            <div class="neon-card">
+                <div class="card-inner">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <i class="fas fa-rocket" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i>
+                        <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
+                    </div>
+                    <h3>SaaS Dashboard</h3>
+                    <p>Painel administrativo completo.</p>
+                    <div class="tech-stack"><span>Vue.js</span><span>Firebase</span></div>
+                    <div class="card-links">
+                        <a href="#" class="card-btn"><i class="fab fa-github"></i> Code</a>
+                        <a href="#" class="card-btn"><i class="fas fa-eye"></i> Demo</a>
+                    </div>
+                </div>
+            </div>
+            <div class="neon-card">
+                <div class="card-inner">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <i class="fas fa-gamepad" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i>
+                        <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
+                    </div>
+                    <h3>Game Hub</h3>
+                    <p>Busca de jogos via API.</p>
+                    <div class="tech-stack"><span>React</span><span>Axios</span></div>
+                    <div class="card-links">
+                        <a href="#" class="card-btn"><i class="fab fa-github"></i> Code</a>
+                        <a href="#" class="card-btn"><i class="fas fa-eye"></i> Demo</a>
+                    </div>
+                </div>
+            </div>
+             <div class="neon-card">
+                <div class="card-inner">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <i class="fas fa-bolt" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i>
+                        <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
+                    </div>
+                    <h3>AI Chat</h3>
+                    <p>Interface moderna de IA.</p>
+                    <div class="tech-stack"><span>Next.js</span><span>OpenAI</span></div>
+                    <div class="card-links">
+                        <a href="#" class="card-btn"><i class="fab fa-github"></i> Code</a>
+                        <a href="#" class="card-btn"><i class="fas fa-eye"></i> Demo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials">
+        <h2 class="section-title">O que <span>Dizem</span></h2>
+        <div class="grid-container">
+            <div class="neon-card">
+                <div class="card-inner" style="text-align: center;">
+                    <div class="testimonial-avatar">
+                        <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Foto do Cliente">
+                    </div>
+                    <i class="fas fa-quote-left" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i>
+                    <p style="font-style: italic;">"O trabalho ficou incrível! Superou todas as expectativas e o código é muito limpo."</p>
+                    <h4 style="color: var(--text-main); margin-top: 15px;">Ricardo Silva</h4>
+                    <span style="font-size: 0.9rem; color: var(--accent);">CEO TechStart</span>
+                </div>
+            </div>
+            <div class="neon-card">
+                <div class="card-inner" style="text-align: center;">
+                    <div class="testimonial-avatar">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" alt="Foto do Cliente">
+                    </div>
+                    <i class="fas fa-quote-left" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i>
+                    <p style="font-style: italic;">"Profissional excelente. Entendeu exatamente o que eu precisava e entregou antes do prazo."</p>
+                    <h4 style="color: var(--text-main); margin-top: 15px;">Ana Clara</h4>
+                    <span style="font-size: 0.9rem; color: var(--accent);">Designer</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title">Vamos <span>Conversar?</span></h2>
+        <div class="contact-wrapper">
+            <div class="contact-info">
+                <h3><span class="scroll-type-text"></span><span class="txt-cursor">|</span></h3>
+                <p>Estou pronto para fazer parte desse projeto!</p>
+                <div class="social-icons-big">
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <form class="contact-form">
+                <div class="input-group"><input type="text" placeholder="Nome" required></div>
+                <div class="input-group"><input type="email" placeholder="Email" required></div>
+                <div class="input-group"><textarea placeholder="Mensagem" required></textarea></div>
+                <button type="submit" class="submit-btn">ENVIAR MENSAGEM <i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>SOBRE MIM</h4>
+                <p>Estudante Front-End apaixonado por criar experiências digitais únicas e performáticas.</p>
+                <div style="display: flex; gap: 10px;">
+                    <i class="fab fa-html5" style="font-size: 1.5rem; color: var(--text-sec)"></i>
+                    <i class="fab fa-css3" style="font-size: 1.5rem; color: var(--text-sec)"></i>
+                    <i class="fab fa-js" style="font-size: 1.5rem; color: var(--text-sec)"></i>
+                  </div>
+                  <!-- <i class="fab fa-react" style="font-size: 1.5rem; color: var(--text-sec)"></i>
+                  <i class="fab fa-angular" style="font-size: 1.5rem; color: var(--text-sec)"></i>
+                  <i class="fab fa-bootstrap" style="font-size: 1.5rem; color: var(--text-sec)"></i>
+                  <i class="fab fa-bootstrap" style="font-size: 1.5rem; color: var(--text-sec)"></i> -->
+            </div>
+            <div class="footer-col">
+                <h4>LINKS RÁPIDOS</h4>
+                <ul class="footer-links">
+                    <li><a href="#home">Início</a></li>
+                    <li><a href="#experience">Jornada</a></li>
+                    <li><a href="#projects">Portfólio</a></li>
+                    <li><a href="#contact">Contato</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>RECURSOS</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Blog Pessoal</a></li>
+                    <li><a href="#">Snippets</a></li>
+                    <li><a href="#">UI Kit</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>REDES SOCIAIS</h4>
+                <p>Vamos conectar:</p>
+                <div class="social-icons-big" style="justify-content: start; background: transparent; border: none;">
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+     <div class="footer-bottom">
+    <div class="system-status">
+        <span class="status-dot"></span>
+        <span class="status-text" data-hover="🚀 Disponível para Contratação">
+            System Online | Vibe Coding v1.0
+        </span>
+    </div>
+</div>
+    </footer>
+
+    <div class="scroll-top" onclick="window.scrollTo(0,0)"><i class="fas fa-arrow-up"></i></div>
+
+   <script>
+             // 1. PARTICLES (Adaptativo)
+        const canvas = document.getElementById('particles'); 
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const particlesArray = [];
+        
+        class Particle {
+            constructor() { 
+                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; 
+                this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 1.5 - 0.75; this.speedY = Math.random() * 1.5 - 0.75; 
+            }
+            update() { 
+                this.x += this.speedX; this.y += this.speedY; 
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1; if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            draw() { 
+                ctx.fillStyle = document.body.classList.contains('light-mode') ? '#2563eb' : '#00ff88'; 
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); 
+            }
+        }
+        
+        function initParticles() { 
+            particlesArray.length = 0; let count = (window.innerWidth * window.innerHeight) / 9000; 
+            for (let i = 0; i < count; i++) particlesArray.push(new Particle()); 
+        }
+        
+        function animateParticles() { 
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update(); particlesArray[i].draw();
+                for (let j = i; j < particlesArray.length; j++) {
+                    const dx = particlesArray[i].x - particlesArray[j].x; const dy = particlesArray[i].y - particlesArray[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 150) { 
+                        ctx.beginPath(); 
+                        let color = document.body.classList.contains('light-mode') ? '37, 99, 235' : '0, 255, 136';
+                        ctx.strokeStyle = `rgba(${color}, ${1 - distance/150})`; 
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y); ctx.lineTo(particlesArray[j].x, particlesArray[j].y); ctx.stroke();
+                    }
+                }
+            } 
+            requestAnimationFrame(animateParticles); 
+        }
+        initParticles(); animateParticles();
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initParticles(); });
+
+        // 2. SCROLL PROGRESS
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('scroll-progress-bar').style.width = scrolled + "%";
+            document.getElementById('scroll-percent-text').innerText = Math.round(scrolled) + "%";
+            document.querySelector('.scroll-top').style.opacity = winScroll > 300 ? '1' : '0';
+            document.querySelector('.scroll-top').style.pointerEvents = winScroll > 300 ? 'auto' : 'none';
+        });
+
+        // 3. TYPEWRITER (HERO)
+        class TypeWriter {
+            constructor(txtElement, words, wait = 3000) {
+                this.txtElement = txtElement; this.words = words; this.txt = '';
+                this.wordIndex = 0; this.wait = parseInt(wait, 10); this.type(); this.isDeleting = false;
+            }
+            type() {
+                const current = this.wordIndex % this.words.length; const fullTxt = this.words[current];
+                if(this.isDeleting) { this.txt = fullTxt.substring(0, this.txt.length - 1); } 
+                else { this.txt = fullTxt.substring(0, this.txt.length + 1); }
+                this.txtElement.innerHTML = this.txt;
+                let typeSpeed = 100;
+                if(this.isDeleting) { typeSpeed /= 2; }
+                if(!this.isDeleting && this.txt === fullTxt) { typeSpeed = this.wait; this.isDeleting = true; } 
+                else if(this.isDeleting && this.txt === '') { this.isDeleting = false; this.wordIndex++; typeSpeed = 500; }
+                setTimeout(() => this.type(), typeSpeed);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const txtElement = document.querySelector('.txt-type');
+            const words = JSON.parse(txtElement.getAttribute('data-words'));
+            new TypeWriter(txtElement, words, 2000);
+        });
+
+        // 4. STORYTELLER (SOBRE MIM) - RESTAURADO E ATUALIZADO
+        const bioPart1 = document.getElementById('bio-part-1');
+        const bioPart2 = document.getElementById('bio-part-2');
+        
+        // Texto Exato que você pediu
+        const text1 = "Me chamo Diogo e estou em busca de um estágio para aplicar e expandir meus conhecimentos, contribuindo para projetos reais e inovadores.";
+        const text2 = "Atualmente, estou cursando o 5º período de Análise e Desenvolvimento de Sistemas e busco uma oportunidade de estágio como desenvolvedor web. Meu objetivo é aprimorar minhas habilidades técnicas, colaborar em equipe e contribuir para o desenvolvimento de soluções web eficientes e criativas.";
+        
+        let startedBio = false;
+
+        const observerAbout = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !startedBio) {
+                    startedBio = true;
+                    typeText(bioPart1, text1, 0, () => {
+                        bioPart1.classList.remove('typing-cursor');
+                        bioPart2.classList.add('typing-cursor');
+                        typeText(bioPart2, text2, 0, () => {
+                            bioPart2.classList.remove('typing-cursor');
+                        });
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        observerAbout.observe(document.querySelector('#about'));
+
+        function typeText(element, text, index, callback) {
+            if (index < text.length) {
+                element.textContent += text.charAt(index);
+                setTimeout(() => typeText(element, text, index + 1, callback), 20); // Velocidade da digitação
+            } else if (callback) {
+                callback();
+            }
+        }
+// 5. INFINITE TYPEWRITER (CONTACT SECTION)
+        const scrollTextElement = document.querySelector('.scroll-type-text');
+        
+        // LISTA DE FRASES PARA ALTERNAR
+        const contactPhrases = [
+            "Tem um projeto em mente?", 
+            "Vamos tirar sua ideia do papel?", 
+            "Precisa de um site moderno?",
+            "Vamos criar algo incrível?",
+            "Quero participar do projeto!"
+        ];
+        
+        let contactPhraseIndex = 0;
+        let contactCharIndex = 0;
+        let isContactDeleting = false;
+        let contactStarted = false;
+
+        function typeContactLoop() {
+            const currentPhrase = contactPhrases[contactPhraseIndex % contactPhrases.length];
+            // Velocidade: apaga mais rápido (50ms) do que escreve (100ms)
+            const typeSpeed = isContactDeleting ? 50 : 100; 
+
+            if (isContactDeleting) {
+                // Apagando
+                scrollTextElement.textContent = currentPhrase.substring(0, contactCharIndex - 1);
+                contactCharIndex--;
+            } else {
+                // Escrevendo
+                scrollTextElement.textContent = currentPhrase.substring(0, contactCharIndex + 1);
+                contactCharIndex++;
+            }
+
+            let nextSpeed = typeSpeed;
+
+            // Lógica de Troca
+            if (!isContactDeleting && contactCharIndex === currentPhrase.length) {
+                // Terminou de escrever: Espera 2 segundos antes de apagar
+                nextSpeed = 2000;
+                isContactDeleting = true;
+            } else if (isContactDeleting && contactCharIndex === 0) {
+                // Terminou de apagar: Passa para a próxima frase
+                isContactDeleting = false;
+                contactPhraseIndex++;
+                nextSpeed = 500; // Espera meio segundo antes de começar a próxima
+            }
+
+            setTimeout(typeContactLoop, nextSpeed);
+        }
+
+        // Inicia apenas quando a seção aparece na tela
+        const observerContact = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { 
+                if (entry.isIntersecting && !contactStarted) { 
+                    contactStarted = true; 
+                    typeContactLoop(); 
+                } 
+            });
+        }, { threshold: 0.5 });
+        
+        observerContact.observe(document.querySelector('#contact'));
+
+        // 6. MOUSE & MENU
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        window.addEventListener('mousemove', (e) => {
+            cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
+            cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
+        });
+        
+        const menuBtn = document.querySelector('.menu-btn'); const navLinks = document.querySelector('.nav-links');
+        menuBtn.addEventListener('click', () => { navLinks.classList.toggle('active'); });
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+
+        // 7. ANIMATIONS
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if(entry.isIntersecting) { const bars = entry.target.querySelectorAll('.progress-fill'); bars.forEach(bar => bar.style.width = bar.getAttribute('data-width')); } });
+        });
+        document.querySelectorAll('#skills').forEach(section => observer.observe(section));
+
+        // 8. HACKER EFFECT
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@#$%&";
+        const logo = document.getElementById("hacker-text");
+        logo.onmouseover = event => {
+            let iteration = 0;
+            const interval = setInterval(() => {
+                event.target.innerText = event.target.innerText.split("").map((letter, index) => {
+                    if(index < iteration) return event.target.dataset.value[index];
+                    return letters[Math.floor(Math.random() * 26)];
+                }).join("");
+                if(iteration >= event.target.dataset.value.length) clearInterval(interval);
+                iteration += 1 / 3;
+            }, 30);
+        }
+        logo.dataset.value = "<Diogo Lobo/>"; 
+  
+   </script>
+</body>
+</html>
