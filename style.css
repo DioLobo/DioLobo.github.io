@@ -1,0 +1,444 @@
+        /* =========================================
+           1. VARIÁVEIS & RESET
+           ========================================= */
+        :root {
+            --bg-color: #050505;
+            --card-bg: #0b0b0b;
+            --text-main: #ffffff;
+            --text-sec: #a0a0a0;
+            --accent: #00ff88; /* Verde Neon */
+            --accent-sec: #00b8ff;
+            --accent-glow: rgba(0, 255, 136, 0.5);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            
+            /* NOVA VARIÁVEL PARA O MENU */
+            --nav-bg: rgba(0, 0, 0, 0.8); 
+            --scroll-track: rgba(0, 0, 0, 0.9); /* Fundo Preto no Modo Escuro */
+            --text-scroll: #000;
+        }
+
+        body.light-mode {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sec: #555555;
+            --accent: #2563eb;
+            --accent-sec: #7c3aed;
+            --accent-glow: rgba(37, 99, 235, 0.4);
+            --input-bg: #eef2f6;
+            --border-color: rgba(0, 0, 0, 0.1);
+            
+            /* MENU BRANCO NO MODO CLARO */
+            --nav-bg: rgba(255, 255, 255, 0.95); 
+            --scroll-track: #ffffff; /* Fundo Branco no Modo Claro */
+            --text-scroll: #fff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        html { scroll-behavior: smooth; }
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            font-family: 'Segoe UI', sans-serif; 
+            overflow-x: hidden; 
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Container Centralizador */
+        .container { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* =========================================
+           2. UTILITÁRIOS (SCROLL BAR HUD)
+           ========================================= */
+        #scroll-loader-container {
+            position: fixed; top: 0; left: 0; width: 100%; 
+            height: 20px; 
+background: var(--scroll-track);
+            z-index: 10001;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #scroll-progress-bar {
+            height: 100%; 
+            background: var(--accent); 
+            width: 0%; 
+            box-shadow: 0 0 15px var(--accent); 
+            position: relative; 
+            transition: width 0.1s linear;
+            min-width: 35px; 
+        }
+
+        #scroll-percent-text {
+            position: absolute; 
+            right: 5px; 
+            top: 50%;
+            transform: translateY(-50%); 
+            font-family: 'Courier New', monospace; 
+            font-weight: 900; 
+            color: var(--text-scroll); /* Texto sempre preto para ler dentro do verde/azul */
+            font-size: 0.75rem; 
+            background: transparent; 
+            padding: 0; 
+            border: none; 
+            pointer-events: none;
+        }
+
+        #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+        .cursor-dot, .cursor-outline { position: fixed; top: 0; left: 0; transform: translate(-50%, -50%); border-radius: 50%; z-index: 9999; pointer-events: none; }
+        .cursor-dot { width: 8px; height: 8px; background-color: var(--accent); }
+        .cursor-outline { width: 40px; height: 40px; border: 2px solid var(--accent); transition: width 0.2s, height 0.2s, background-color 0.2s; }
+        a:hover ~ .cursor-outline, button:hover ~ .cursor-outline, .neon-card:hover ~ .cursor-outline, input:hover ~ .cursor-outline, .system-status:hover ~ .cursor-outline { transform: translate(-50%, -50%) scale(1.8); background-color: var(--accent-glow); border-color: transparent; mix-blend-mode: screen; }
+
+        /* =========================================
+           3. NAVBAR (ATUALIZADO COM VARIÁVEL)
+           ========================================= */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 5%;
+            position: fixed; width: 100%; z-index: 1000;
+            
+            /* AQUI ESTÁ A MUDANÇA: Usa a variável que muda de cor */
+            background: var(--nav-bg); 
+            backdrop-filter: blur(10px);
+            
+            border-bottom: 1px solid var(--border-color);
+            top: 20px; 
+            transition: background 0.3s ease;
+        }
+        .logo { font-size: 1.8rem; font-weight: bold; color: var(--accent); letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
+        .nav-links { display: flex; gap: 30px; list-style: none; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 1.1rem; transition: 0.3s; position: relative; }
+        .nav-links a:hover { color: var(--accent); }
+        .nav-links a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s ease; }
+        .nav-links a:hover::after { width: 100%; }
+        .theme-switch { background: transparent; border: 2px solid var(--text-main); color: var(--text-main); padding: 8px 12px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
+        .menu-btn { display: none; font-size: 1.8rem; cursor: pointer; color: var(--text-main); }
+
+        /* =========================================
+           4. HERO (Compacto)
+           ========================================= */
+        .hero { height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 0 20px; }
+        
+        .status-badge { background: rgba(0, 255, 136, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 25px; display: inline-flex; align-items: center; gap: 10px; animation: float 3s ease-in-out infinite; }
+        .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+        
+        .hero h3 { color: var(--accent); margin-bottom: 15px; letter-spacing: 4px; font-size: 1.2rem; }
+        .hero h1 { font-size: 4.5rem; line-height: 1.1; margin-bottom: 20px; font-weight: 800; }
+        .txt-type { border-right: 3px solid var(--accent); padding-right: 5px; animation: blink 0.8s infinite; }
+        .hero p { font-size: 1.2rem; color: var(--text-sec); max-width: 800px; margin-bottom: 30px; line-height: 1.5; }
+        
+        .cta-btn { padding: 14px 40px; background: var(--accent); color: #000; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow); transition: 0.3s; display: inline-block; animation: pulse-btn 2s infinite; }
+        .cta-btn:hover { transform: scale(1.05); }
+        .btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--text-main); box-shadow: none; margin-left: 15px; animation: none; }
+        .btn-outline:hover { background: var(--accent-glow); color: #fff; border-color: transparent; }
+
+        /* =========================================
+           5. SEÇÕES (Ajuste de Margem 30px-50px)
+           ========================================= */
+        /* Aqui está a correção principal de espaçamento */
+        section { 
+            padding: 50px 5%; /* 50px cima/baixo, 5% laterais */
+        }
+        
+        .section-title { font-size: 2.8rem; margin-bottom: 50px; text-align: center; font-weight: 800; color: var(--text-main); }
+        .section-title span { color: var(--accent); }
+
+        /* =========================================
+           6. SOBRE MIM (Efeito Storyteller Restaurado)
+           ========================================= */
+        #about .about-content { display: flex; align-items: center; justify-content: center; gap: 50px; max-width: 1200px; margin: 0 auto; }
+        
+        .about-img { flex: 1; max-width: 350px; position: relative; animation: float-img 4s ease-in-out infinite; }
+        .about-img img { width: 100%; border-radius: 20px; border: 2px solid var(--accent); box-shadow: 0 0 20px var(--accent-glow); object-fit: cover; }
+        
+        .about-text { flex: 1.5; }
+        .about-text h2 { font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main); }
+        
+        /* Texto Digitado */
+        .bio-text {
+            font-size: 1.1rem; color: var(--text-sec); line-height: 1.6; margin-bottom: 15px;
+            min-height: 80px; 
+            border-left: 3px solid var(--accent); padding-left: 15px;
+        }
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; color: var(--accent); }
+
+        @keyframes float-img { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+
+        /* =========================================
+           7. GRIDS & CARDS
+           ========================================= */
+        /* Gap reduzido para 30px conforme solicitado */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+
+        .neon-card { position: relative; background: var(--card-bg); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .neon-card:hover { transform: translateY(-5px); }
+        .card-inner { background: var(--card-bg); border-radius: 18px; padding: 30px; margin: 2px; z-index: 2; height: 100%; position: relative; }
+        
+        .neon-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, var(--accent), transparent 30%); animation: rotate-border 4s linear infinite; z-index: 1; opacity: 0; transition: opacity 0.3s; }
+        .neon-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, var(--accent-sec), transparent 30%); animation: rotate-border 4s linear infinite; animation-delay: -2s; z-index: 1; opacity: 0; transition: opacity 0.3s; }
+        .neon-card:hover::before, .neon-card:hover::after { opacity: 1; }
+
+        .neon-card h3 { color: var(--text-main); margin-bottom: 10px; font-size: 1.4rem; }
+        .neon-card p { color: var(--text-sec); margin-bottom: 15px; line-height: 1.5; font-size: 0.95rem; }
+        .tech-stack span { display: inline-block; background: var(--input-bg); color: var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; margin: 0 5px 5px 0; border: 1px solid var(--border-color); font-weight: bold; }
+        
+        .card-arrow { font-size: 1.2rem; color: var(--text-sec); transition: 0.4s ease; }
+        .neon-card:hover .card-arrow { color: var(--accent); transform: translate(5px, -5px); }
+        .card-links { margin-top: auto; padding-top: 15px; display: flex; gap: 15px; border-top: 1px solid var(--border-color); }
+        .card-btn { text-decoration: none; font-weight: bold; color: var(--text-main); display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .card-btn:hover { color: var(--accent); }
+
+        .skill-wrapper { margin-bottom: 15px; }
+        .skill-info { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+        .progress-bar-bg { width: 100%; height: 6px; background: var(--input-bg); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0; transition: width 1.5s ease; box-shadow: 0 0 10px var(--accent); }
+
+        .testimonial-avatar { width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+        .testimonial-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* =========================================
+           8. TIMELINE
+           ========================================= */
+        .timeline-container { position: relative; max-width: 800px; margin: 0 auto; }
+        .timeline-container::after { content: ''; position: absolute; width: 2px; background: var(--border-color); top: 0; bottom: 0; left: 50%; margin-left: -1px; }
+        .timeline-item { padding: 10px 40px; position: relative; width: 50%; box-sizing: border-box; }
+        .timeline-item.left { left: 0; text-align: right; }
+        .timeline-item.right { left: 50%; }
+        
+        .timeline-content { padding: 20px; background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border-color); transition: 0.3s; position: relative; z-index: 2; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .timeline-content:hover { border-color: var(--accent); transform: scale(1.02); }
+        .timeline-content h4 { color: var(--accent); font-size: 1.1rem; margin-bottom: 5px; }
+        .timeline-content span { font-size: 0.85rem; color: var(--text-sec); display: block; margin-bottom: 8px; }
+        .timeline-item::after { content: ''; position: absolute; width: 16px; height: 16px; right: -8px; background: var(--card-bg); border: 3px solid var(--accent); top: 25px; border-radius: 50%; z-index: 1; transition: 0.3s; }
+        .timeline-item.right::after { left: -8px; }
+        .timeline-item:hover::after { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        @media (max-width: 768px) {
+            .timeline-container::after { left: 20px; }
+            .timeline-item { width: 100%; padding-left: 50px; padding-right: 10px; }
+            .timeline-item.left { text-align: left; }
+            .timeline-item.right { left: 0; }
+            .timeline-item::after { left: 12px; }
+            .timeline-item.right::after { left: 12px; }
+        }
+
+        /* =========================================
+           9. CONTATO & FOOTER
+           ========================================= */
+        .contact-wrapper { display: flex; flex-wrap: wrap; gap: 50px; justify-content: center; align-items: center; }
+        .contact-info { flex: 1; min-width: 300px; }
+        .contact-info h3 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 15px; background: linear-gradient(to right, var(--text-main), var(--text-sec)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .contact-info p { font-size: 1.2rem; color: var(--text-sec); margin-bottom: 30px; }
+        .social-icons-big a { display: inline-flex; width: 55px; height: 55px; background: var(--input-bg); border-radius: 50%; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-main); margin-right: 15px; border: 1px solid var(--border-color); transition: 0.3s; text-decoration: none; }
+        .social-icons-big a:hover { background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent-glow); animation: shake 0.5s ease-in-out infinite; }
+
+        .contact-form { flex: 1.2; min-width: 350px; background: var(--card-bg); padding: 40px; border-radius: 20px; border: 1px solid var(--border-color); position: relative; overflow: hidden; box-shadow: 0 5px 30px rgba(0,0,0,0.1); }
+        .contact-form::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-sec)); animation: shimmer 2s infinite; }
+        .input-group input, .input-group textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); padding: 15px; border-radius: 10px; color: var(--text-main); margin-bottom: 20px; outline: none; transition: 0.3s; font-family: inherit; font-size: 1rem; }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--accent); background: var(--card-bg); transform: scale(1.01); }
+        .submit-btn { width: 100%; padding: 15px; background: var(--accent); border: none; border-radius: 10px; color: #000; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; animation: pulse-btn 2s infinite; }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 0 20px var(--accent-glow); }
+
+        footer { background: var(--bg-color); padding: 60px 5% 20px; margin-top: 80px; border-top: 1px solid var(--border-color); }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .footer-col h4 { color: var(--accent); font-size: 1.2rem; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px; }
+        .footer-col p { color: var(--text-sec); line-height: 1.5; margin-bottom: 15px; font-size: 0.95rem; }
+        .footer-links li { list-style: none; margin-bottom: 10px; }
+        .footer-links a { color: var(--text-sec); text-decoration: none; transition: 0.3s; font-size: 0.95rem; display: inline-flex; align-items: center; }
+        .footer-links a:hover { color: var(--accent); padding-left: 8px; font-weight: bold; }
+        .footer-links a::before { content: '>'; margin-right: 6px; color: var(--accent); opacity: 0; transition: 0.3s; }
+        .footer-links a:hover::before { opacity: 1; }
+
+        .newsletter-form { display: flex; margin-top: 15px; }
+        .newsletter-form input { padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 5px 0 0 5px; outline: none; width: 100%; }
+        .newsletter-form button { padding: 10px 15px; background: var(--accent); border: none; color: #000; font-weight: bold; border-radius: 0 5px 5px 0; cursor: pointer; transition: 0.3s; }
+        .footer-bottom { text-align: center; border-top: 1px solid var(--border-color); padding-top: 20px; color: var(--text-sec); font-size: 0.85rem; }
+
+        .scroll-top { position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: #000; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 100; }
+        .scroll-top.active { opacity: 1; pointer-events: auto; }
+        .whatsapp-float { position: fixed; bottom: 30px; left: 30px; background: #25D366; color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; z-index: 100; text-decoration: none; box-shadow: 0 0 15px rgba(37, 211, 102, 0.5); transition: 0.3s; }
+        .whatsapp-float:hover { transform: translateY(-5px); box-shadow: 0 0 25px rgba(37, 211, 102, 0.8); }
+
+        @keyframes rotate-border { 100% { transform: rotate(360deg); } }
+        @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
+        @keyframes shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 75% { transform: rotate(-10deg); } }
+        @keyframes pulse-btn { 0% { box-shadow: 0 0 0 0 var(--accent-glow); } 70% { box-shadow: 0 0 0 15px rgba(0,0,0,0); } }
+        @keyframes blink { 0%, 100% { border-color: transparent; } 50% { border-color: var(--accent); } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+        @media(max-width: 768px) {
+            .nav-links { position: fixed; top: 0; right: -100%; width: 80%; height: 100vh; background: var(--bg-color); flex-direction: column; justify-content: center; transition: 0.4s; border-left: 1px solid var(--border-color); }
+            .nav-links.active { right: 0; }
+            .menu-btn { display: block; z-index: 1001; }
+            .hero h1 { font-size: 3rem; }
+            .hero { padding-bottom: 100px; } /* Ajuste Mobile do Hero */
+            .contact-info h3 { font-size: 2.2rem; }
+            .footer-grid { grid-template-columns: 1fr; }
+            #about .about-content { flex-direction: column; }
+            .cta-btn, .btn-outline { width: 100%; margin: 10px 0; display: block; }
+        }
+
+        /* FOOTER STATUS FIX (SEM PULAR) */
+    .footer-bottom { 
+        text-align: center; 
+        border-top: 1px solid var(--border-color); 
+        padding-top: 30px; 
+        display: flex; 
+        justify-content: center; 
+        margin-bottom: 20px; 
+    }
+
+    .system-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 0 25px; /* Padding lateral */
+        background: rgba(0, 255, 136, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        
+        /* O SEGREDO PARA NÃO PULAR: */
+        min-width: 340px; /* Largura fixa suficiente para os dois textos */
+        height: 50px;     /* Altura fixa */
+    }
+
+    .system-status:hover {
+        background: rgba(0, 255, 136, 0.1);
+        border-color: var(--accent);
+        box-shadow: 0 0 25px var(--accent-glow);
+        transform: translateY(-2px);
+    }
+
+    /* A Bolinha (Sempre visível) */
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--accent);
+        animation: pulse-dot 2s infinite;
+        flex-shrink: 0; /* Impede a bolinha de amassar */
+    }
+
+    @keyframes pulse-dot {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+    }
+
+    /* O Texto */
+    .status-text {
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        color: var(--text-sec);
+        font-weight: bold;
+        position: relative;
+        transition: 0.3s;
+        white-space: nowrap;
+    }
+
+    /* TRUQUE DE ANIMAÇÃO SEM LAYOUT SHIFT */
+    
+    /* 1. Ao passar o mouse, o texto original fica invisível (mas segura o espaço) */
+    .system-status:hover .status-text {
+        color: transparent;
+        text-shadow: none;
+    }
+
+    /* 2. Preparamos o novo texto (oculto e centralizado) */
+    .status-text::after {
+        content: attr(data-hover); /* Pega o texto do HTML */
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -40%); /* Levemente deslocado para animar */
+        opacity: 0;
+        color: var(--text-main); /* Cor do novo texto (Branco/Preto) */
+        width: 100%;
+        text-align: center;
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    /* 3. Quando passa o mouse, o novo texto aparece suavemente */
+    .system-status:hover .status-text::after {
+        opacity: 1;
+        transform: translate(-50%, -50%); /* Vai para o centro exato */
+        color: var(--accent); /* Fica verde neon */
+    }
+
+    
+
+
+/* EFEITO GLITCH (Adicione no seu <style>) */
+.glitch-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.glitch-effect {
+    position: relative;
+    color: var(--text-main);
+    font-weight: 800;
+}
+
+/* Cria duas cópias do texto para o efeito RGB */
+.glitch-effect::before,
+.glitch-effect::after {
+    content: attr(data-text); /* Pega o mesmo texto do HTML */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-color); /* Esconde o original */
+}
+
+/* Camada Vermelha/Rosa */
+.glitch-effect::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-1 5s infinite linear alternate-reverse;
+    opacity: 0; /* Só aparece no hover */
+}
+
+/* Camada Azul/Ciano */
+.glitch-effect::after {
+    left: -2px;
+    text-shadow: -1px 0 #00fff9;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-2 5s infinite linear alternate-reverse;
+    opacity: 0; /* Só aparece no hover */
+}
+
+/* ATIVAR NO HOVER */
+.glitch-wrapper:hover .glitch-effect::before,
+.glitch-wrapper:hover .glitch-effect::after {
+    opacity: 1;
+}
+
+/* Animações caóticas */
+@keyframes glitch-anim-1 {
+    0% { clip: rect(20px, 9999px, 80px, 0); }
+    20% { clip: rect(70px, 9999px, 10px, 0); }
+    40% { clip: rect(20px, 9999px, 90px, 0); }
+    60% { clip: rect(80px, 9999px, 5px, 0); }
+    80% { clip: rect(10px, 9999px, 60px, 0); }
+    100% { clip: rect(50px, 9999px, 30px, 0); }
+}
+@keyframes glitch-anim-2 {
+    0% { clip: rect(60px, 9999px, 10px, 0); }
+    20% { clip: rect(10px, 9999px, 50px, 0); }
+    40% { clip: rect(90px, 9999px, 30px, 0); }
+    60% { clip: rect(30px, 9999px, 70px, 0); }
+    80% { clip: rect(50px, 9999px, 20px, 0); }
+    100% { clip: rect(10px, 9999px, 90px, 0); }
+}
+    
