@@ -157,24 +157,25 @@
 
     </section>
 
-    <section id="projects">
+   <section id="projects">
         <h2 class="section-title">Projetos <span>Recentes</span></h2>
         <div class="grid-container">
+            
             <div class="neon-card">
-                <div class="card-inner">
+                <div class="card-inner project-trigger" data-image="print-saas.png" data-title="SaaS Dashboard">
                     <div style="display: flex; justify-content: space-between; align-items: start;">
                         <i class="fas fa-rocket" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i>
-                        <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
-                    </div>
+                        <div class="card-arrow"><i class="fas fa-expand"></i></div> </div>
                     <h3>SaaS Dashboard</h3>
                     <p>Painel administrativo completo.</p>
-                    <div class="tech-stack"><span>Vue.js</span><span>Firebase</span></div>
+                    <div class="tech-stack"><span>Js | php</span><span>MYSQL</span></div>
                     <div class="card-links">
-                        <a href="#" class="card-btn"><i class="fab fa-github"></i> Code</a>
-                        <a href="#" class="card-btn"><i class="fas fa-eye"></i> Demo</a>
+                        <a href="#" class="card-btn" onclick="event.stopPropagation()"><i class="fab fa-github"></i> Code</a>
+                        <a href="#" class="card-btn" onclick="event.stopPropagation()"><i class="fas fa-eye"></i> Demo</a>
                     </div>
                 </div>
             </div>
+
             <div class="neon-card">
                 <div class="card-inner">
                     <div style="display: flex; justify-content: space-between; align-items: start;">
@@ -320,6 +321,13 @@
     </footer>
 
     <div class="scroll-top" onclick="window.scrollTo(0,0)"><i class="fas fa-arrow-up"></i></div>
+
+
+<div id="projectModal" class="modal">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="img01">
+        <div id="caption"></div>
+    </div>
 
    <script src="/script.js"></script>
 </body>
