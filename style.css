@@ -442,3 +442,84 @@ background: var(--scroll-track);
     100% { clip: rect(10px, 9999px, 90px, 0); }
 }
     
+
+/* =========================================
+           10. MODAL DE IMAGEM (NOVO)
+           ========================================= */
+     .modal {
+            display: none; /* O JS muda para 'flex' ao clicar */
+            position: fixed; 
+            z-index: 10002; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.9); 
+            backdrop-filter: blur(5px); 
+            
+            /* --- FLEXBOX CENTRALIZADO --- */
+            align-items: center; 
+            justify-content: center;
+            
+            /* ISSO AQUI É O PULO DO GATO: */
+            flex-direction: column; /* Empilha a imagem e o texto verticalmente */
+        }
+
+        /* A imagem dentro do modal */
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 900px;
+            max-height: 80vh;
+            object-fit: contain;
+            border: 2px solid var(--accent); /* Borda Neon */
+            box-shadow: 0 0 30px var(--accent-glow);
+            border-radius: 10px;
+            animation: zoom 0.3s;
+        }
+
+        /* Botão de Fechar (X) */
+        .close-modal {
+            position: absolute;
+            top: 30px;
+            right: 50px;
+            color: var(--text-main);
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 10003;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: var(--accent);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Legenda do projeto (Opcional) */
+        #caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: var(--text-main);
+            padding: 10px 0;
+            height: 150px;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+
+        @keyframes zoom {
+            from {transform:scale(0)} 
+            to {transform:scale(1)}
+        }
+
+        @media only screen and (max-width: 700px){
+            .modal-content { width: 95%; }
+            .close-modal { top: 20px; right: 20px; }
+        }
